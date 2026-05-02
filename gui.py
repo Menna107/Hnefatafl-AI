@@ -1,5 +1,6 @@
 import tkinter as tk
 from Hnefatafl import reset_board
+from Hnefatafl import Role
 
 class GameGUI:
     def __init__(self):
@@ -92,11 +93,11 @@ class GameGUI:
                 y = i * self.cell_size
                 padding = 8
 
-                if piece == 'A':  # attacker (black)
+                if piece.role == Role.ATTACKER:  # attacker (black)
                     color = "#1f1f1f"
-                elif piece == 'D':  # defender (white)
+                elif piece.role == Role.DEFENDER:  # defender (white)
                     color = "#d9d9d9"
-                elif piece == 'K':  # king
+                elif piece.role == Role.KING:  # king
                     color = "#cfd8dc"
 
                 self.canvas.create_oval(
@@ -109,7 +110,7 @@ class GameGUI:
                 )
 
                 # Draw crown for king
-                if piece == 'K':
+                if piece.role == Role.KING:
                     self.canvas.create_text(
                         x + self.cell_size/2,
                         y + self.cell_size/2,
@@ -149,6 +150,8 @@ class GameGUI:
         piece = self.board[r1][c1]
         self.board[r1][c1] = '_'
         self.board[r2][c2] = piece
+
+        piece.move(r2, c2)
 
     def reset_game(self):
         self.board = reset_board(self.n)
