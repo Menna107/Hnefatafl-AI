@@ -140,7 +140,7 @@ def get_depth():
     elif game_state["difficulty"] == "medium":
         return 3
     else:  # hard
-        return 5
+        return 4
 
 def reset_game():
     current_difficulty = game_state["difficulty"]
