@@ -1,6 +1,10 @@
 import tkinter as tk
-from Hnefatafl import reset_board
-from Hnefatafl import Role
+from tkinter import messagebox
+from Hnefatafl import reset_board, Role
+from game_controller import handle_click, game_state, reset_game as controller_reset, get_turn_label, get_depth, set_difficulty
+from ai import get_best_move, get_all_moves
+
+import threading
 
 class GameGUI:
     def __init__(self):
@@ -13,6 +17,10 @@ class GameGUI:
         self.cell_size = 50
         self.selected = None
         self.valid_moves = []
+
+        self.human_team = "DEFENDERS"
+        self.ai_team = "ATTACKERS"
+        self.is_ai_thinking = False
 
         self.frame = tk.Frame(self.root)
         self.frame.pack()
@@ -31,9 +39,67 @@ class GameGUI:
         # Draw board
         self.redraw()
 
-        # Reset button
-        reset_btn = tk.Button(self.frame, text="Reset", command=self.reset_game)
-        reset_btn.pack()
+        # Turn label
+        self.turn_label = tk.Label(self.frame, text=get_turn_label())
+        self.turn_label.pack()
+
+        self.show_start_menu()
+
+    def show_start_menu(self):
+        self.menu_window = tk.Toplevel(self.root)
+        self.menu_window.title("Start Game")
+
+        self.menu_window.transient(self.root)   
+        self.menu_window.grab_set()             
+        self.menu_window.focus_force()          
+
+        tk.Label(self.menu_window, text="Choose Your Team").pack(pady=10)
+
+        self.team_choice = tk.StringVar(value="DEFENDERS")
+
+        tk.Radiobutton(self.menu_window, text="Defenders (White)", 
+                    variable=self.team_choice, value="DEFENDERS").pack()
+
+        tk.Radiobutton(self.menu_window, text="Attackers (Black)", 
+                    variable=self.team_choice, value="ATTACKERS").pack()
+
+        tk.Label(self.menu_window, text="Difficulty").pack(pady=10)
+
+        self.diff_choice = tk.StringVar(value="medium")
+
+        tk.Radiobutton(self.menu_window, text="Easy", variable=self.diff_choice, value="easy").pack()
+        tk.Radiobutton(self.menu_window, text="Medium", variable=self.diff_choice, value="medium").pack()
+        tk.Radiobutton(self.menu_window, text="Hard", variable=self.diff_choice, value="hard").pack()
+
+        tk.Button(self.menu_window, text="Start Game", command=self.start_game).pack(pady=15)
+
+    def start_game(self):
+        team = self.team_choice.get()
+        difficulty = self.diff_choice.get()
+
+        # Set teams
+        self.human_team = team
+        self.ai_team = "ATTACKERS" if team == "DEFENDERS" else "DEFENDERS"
+
+        # Set difficulty
+        set_difficulty(difficulty)
+
+        # Reset game
+        controller_reset()
+        self.board = game_state["board"]
+
+        self.selected = None
+        self.valid_moves = []
+
+        self.turn_label.config(text=get_turn_label())
+        self.redraw()
+
+        # Close menu
+        self.menu_window.destroy()
+
+        # If AI starts → trigger it
+        if game_state["current_turn"] == self.ai_team:
+            self.root.after(300, self.ai_move)
 
     def draw_grid(self):
         mid = self.n // 2
@@ -86,7 +152,7 @@ class GameGUI:
             for j in range(self.n):
                 piece = self.board[i][j]
 
-                if piece == '_':
+                if piece is None:
                     continue
 
                 x = j * self.cell_size
@@ -125,37 +191,88 @@ class GameGUI:
         self.draw_pieces()
 
     def on_click(self, event):
+        if self.is_ai_thinking:
+            return
+
+        if game_state["current_turn"] != self.human_team:
+            return
+
         col = event.x // self.cell_size
         row = event.y // self.cell_size
 
-        if self.selected is None:
-            if self.board[row][col] != '_':
-                self.selected = (row, col)
 
-                # TEMP: fake valid moves (for testing UI)
-                self.valid_moves = [(row, col+1), (row, col-1)]
-                
-        else:
-            self.make_move(self.selected, (row, col))
-            self.selected = None
-            self.valid_moves = []
-        
+        result = handle_click(row, col)
+
+        self.board = game_state["board"]
+        self.selected = game_state["selected"]
+        self.valid_moves = game_state["valid_moves"]
+
+        self.turn_label.config(text=get_turn_label())
         self.redraw()
 
-    #temp move until the logic is implemented
-    def make_move(self, from_pos, to_pos):
-        r1, c1 = from_pos
-        r2, c2 = to_pos
+        if game_state["game_over"]:
+            self.show_winner(game_state["winner"])
+            return
 
-        piece = self.board[r1][c1]
-        self.board[r1][c1] = '_'
-        self.board[r2][c2] = piece
-
-        piece.move(r2, c2)
+        if result == "moved":
+            self.root.after(200, self.ai_move)
 
     def reset_game(self):
-        self.board = reset_board(self.n)
+        controller_reset()
+        self.board = game_state["board"]
+        self.selected = None
+        self.valid_moves = []
+        self.turn_label.config(text=get_turn_label())
+
         self.redraw()
+
+    def show_winner(self, winner):
+        result = messagebox.askquestion("Game Over", f"{winner} wins!\nPlay again?")
+
+        if result == "yes":
+            self.show_start_menu()
+
+    def ai_move(self):
+        if game_state["game_over"]:
+            return
+
+        if game_state["current_turn"] != self.ai_team:
+            return
+
+        self.is_ai_thinking = True
+
+        threading.Thread(target=self._compute_ai_move).start()
+
+    def _compute_ai_move(self):
+        board = game_state["board"]
+        depth = get_depth()
+
+        move = get_best_move(board, depth, self.ai_team)
+
+        if move is None:
+            self.root.after(0, lambda: setattr(self, "is_ai_thinking", False))
+            return
+
+        def apply_move():
+            (r1, c1), (r2, c2) = move
+
+            handle_click(r1, c1)
+            handle_click(r2, c2)
+
+            self.board = game_state["board"]
+            self.selected = game_state["selected"]
+            self.valid_moves = game_state["valid_moves"]
+
+            self.turn_label.config(text=get_turn_label())
+            self.redraw()
+
+            self.is_ai_thinking = False
+
+            if game_state["game_over"]:
+                self.show_winner(game_state["winner"])
+
+        # Send back to UI thread
+        self.root.after(0, apply_move)
 
     def run(self):
         self.root.mainloop()

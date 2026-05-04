@@ -37,7 +37,7 @@ def select_piece(row, col):
     piece = board[row][col]
  
     # Empty cell 
-    if piece == '_' or piece is None:
+    if piece is None:
         clear_selection()
         return False
     
@@ -68,7 +68,7 @@ def try_move(to_row, to_col):
  
     # Move the piece
     piece = board[from_row][from_col]
-    board[from_row][from_col] = '_'
+    board[from_row][from_col] = None
     board[to_row][to_col] = piece
     piece.move(to_row, to_col)
  
@@ -111,7 +111,7 @@ def handle_click(row, col):
         return "invalid"
  
     # Clicked another piece of the same team , re-select
-    if piece != '_' and piece is not None and belongs_to_current_turn(piece):
+    if piece is not None and belongs_to_current_turn(piece):
         game_state["selected"] = (row, col)
         game_state["valid_moves"] = generate_valid_moves(piece, board)
         return "selected"

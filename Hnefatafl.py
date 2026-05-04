@@ -24,7 +24,7 @@ board = []
 for i in range(n):
     row = []
     for j in range(n):
-        row.append('_')
+        row.append(None)
     board.append(row)
 
 
@@ -69,7 +69,7 @@ def print_board(board):
     for row in board:
         formatted_row = []
         for cell in row:
-            if cell == '_':
+            if cell is None:
                 formatted_row.append('_')
             else:
                 formatted_row.append(cell.role.value)
@@ -80,8 +80,8 @@ def clone_board(board):
     for row in board:
         new_row = []
         for cell in row:
-            if cell == '_':
-                new_row.append('_')
+            if cell is None:
+                new_row.append(None)
             else:
                 new_row.append(Piece(cell.role, cell.position[0], cell.position[1]))
         new_board.append(new_row)
@@ -92,7 +92,7 @@ def reset_board(n):
     for i in range(n):
         row = []
         for j in range(n):
-            row.append('_')
+            row.append(None)
         board.append(row)
 
     setup_board(board, n)

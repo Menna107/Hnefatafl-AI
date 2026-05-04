@@ -18,7 +18,7 @@ def evaluate_board(board):
         for c in range(11):
             piece = board[r][c]
 
-            if piece is None or piece == '_':
+            if piece is None:
                 continue
 
             if piece.role == Role.ATTACKER:
@@ -52,7 +52,7 @@ def get_all_moves(board, team):
         for c in range(11):
             piece = board[r][c]
 
-            if piece is None or piece == '_':
+            if piece is None:
                 continue
 
             if team == "ATTACKERS" and piece.role == Role.ATTACKER:
@@ -73,7 +73,7 @@ def apply_move(board, move):
     (r1, c1), (r2, c2) = move
     piece = new_board[r1][c1]
 
-    new_board[r1][c1] = '_'
+    new_board[r1][c1] = None
     new_board[r2][c2] = piece
     piece.move(r2, c2)
 
