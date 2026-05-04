@@ -131,7 +131,7 @@ def execute_captures(piece_role, r, c, board):
         # Is there an enemy? (And it's NOT the King)
         if possible_enemy is not None and possible_enemy.role != piece_role and possible_enemy.role != Role.KING:
             # Is the other side an ally, or a restricted square?
-            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted):
+            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r][c+2] is None):
                 captured_pieces.append((r, c+1))
 
     # --- Check LEFT ---
@@ -141,7 +141,7 @@ def execute_captures(piece_role, r, c, board):
         possible_ally_pos = (r, c-2)
         
         if possible_enemy is not None and possible_enemy.role != piece_role and possible_enemy.role != Role.KING:
-            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted):
+            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r][c-2] is None):
                 captured_pieces.append((r, c-1))
 
     # --- Check DOWN ---
@@ -151,7 +151,7 @@ def execute_captures(piece_role, r, c, board):
         possible_ally_pos = (r+2, c)
         
         if possible_enemy is not None and possible_enemy.role != piece_role and possible_enemy.role != Role.KING:
-            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted):
+            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r+2][c] is None):
                 captured_pieces.append((r+1, c))
 
     # --- Check UP ---
@@ -161,7 +161,7 @@ def execute_captures(piece_role, r, c, board):
         possible_ally_pos = (r-2, c)
         
         if possible_enemy is not None and possible_enemy.role != piece_role and possible_enemy.role != Role.KING:
-            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted):
+            if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r-2][c] is None):
                 captured_pieces.append((r-1, c))
 
     # Remove all captured pieces from the board
