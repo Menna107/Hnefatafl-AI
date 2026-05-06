@@ -72,22 +72,22 @@ def generate_valid_moves(piece, board):
     valid_moves = []
     start_row, start_col = piece.position
 
-    # Scan UP
+    # UP
     for r in range(start_row - 1, -1, -1):
         if not process_square(r, start_col, piece, board, valid_moves): 
             break
             
-    # Scan DOWN
+    # DOWN
     for r in range(start_row + 1, 11):
         if not process_square(r, start_col, piece, board, valid_moves): 
             break
             
-    # Scan LEFT
+    # LEFT
     for c in range(start_col - 1, -1, -1):
         if not process_square(start_row, c, piece, board, valid_moves): 
             break
             
-    # Scan RIGHT
+    # RIGHT
     for c in range(start_col + 1, 11):
         if not process_square(start_row, c, piece, board, valid_moves): 
             break
@@ -122,19 +122,18 @@ def execute_captures(piece_role, r, c, board):
     restricted = {(0, 0), (0, 10), (10, 0), (10, 10), (5, 5)}
     captured_pieces = []
 
-    # --- Check RIGHT ---
+    # RIGHT
     if c + 2 <= 10:
         possible_enemy = board[r][c+1]
         possible_ally = board[r][c+2]
         possible_ally_pos = (r, c+2)
         
-        # Is there an enemy? (And it's NOT the King)
+        
         if possible_enemy is not None and possible_enemy.role != piece_role and possible_enemy.role != Role.KING:
-            # Is the other side an ally, or a restricted square?
             if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r][c+2] is None):
                 captured_pieces.append((r, c+1))
 
-    # --- Check LEFT ---
+    # LEFT
     if c - 2 >= 0:
         possible_enemy = board[r][c-1]
         possible_ally = board[r][c-2]
@@ -144,7 +143,7 @@ def execute_captures(piece_role, r, c, board):
             if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r][c-2] is None):
                 captured_pieces.append((r, c-1))
 
-    # --- Check DOWN ---
+    # DOWN
     if r + 2 <= 10:
         possible_enemy = board[r+1][c]
         possible_ally = board[r+2][c]
@@ -154,7 +153,7 @@ def execute_captures(piece_role, r, c, board):
             if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r+2][c] is None):
                 captured_pieces.append((r+1, c))
 
-    # --- Check UP ---
+    # UP
     if r - 2 >= 0:
         possible_enemy = board[r-1][c]
         possible_ally = board[r-2][c]
@@ -164,7 +163,6 @@ def execute_captures(piece_role, r, c, board):
             if (possible_ally is not None and possible_ally.role == piece_role) or (possible_ally_pos in restricted and board[r-2][c] is None):
                 captured_pieces.append((r-1, c))
 
-    # Remove all captured pieces from the board
     for row, col in captured_pieces:
         board[row][col] = None
 
