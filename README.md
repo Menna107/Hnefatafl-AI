@@ -14,9 +14,9 @@ The game features a fully functional graphical user interface built with Python,
 
 ![Main Menu](images/menu.png)
 
-### Main Menu
+### Game Rules
 
-![Main Menu](images/rules.png)
+![Rules](images/rules.png)
 
 ### Gameplay
 
@@ -98,13 +98,13 @@ This project was developed by:
 - Malak Nour
 - Hazem Ahmed
 - Adam Mohamed
-
+  
 ---
 
 ## Course Information
 
-**Faculty of Computing and Artificial Intelligence**
-Cairo University
+Faculty of Computing and Artificial Intelligence  
+Cairo University  
 CS361 – Artificial Intelligence
 
 ---
@@ -114,13 +114,13 @@ CS361 – Artificial Intelligence
 1. Clone the repository:
 
 ```bash
-git clone <repository-link>
+git clone https://github.com/Menna107/Hnefatafl-AI.git
 ```
 
 2. Navigate to the project folder:
 
 ```bash
-cd <project-folder>
+cd Hnefatafl-AI
 ```
 
 3. Run the game:
