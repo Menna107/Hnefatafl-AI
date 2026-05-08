@@ -128,14 +128,3 @@ cd Hnefatafl-AI
 ```bash
 python main.py
 ```
-
----
-
-## Future Improvements
-
-- Add animations and sound effects
-- Improve AI strategy evaluation
-- Add online multiplayer support
-- Add move history and replay system
-
----
